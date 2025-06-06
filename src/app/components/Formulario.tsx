@@ -5,6 +5,8 @@ import Botao from "./Botao";
 
 interface FormularioProps {
     cliente : Cliente
+    clienteMudou?: (cliente: Cliente) => void 
+    cancelado?: () => void
   children?: React.ReactNode;
 }
 
@@ -36,11 +38,12 @@ const [idade, setIdade] = useState(props.cliente?.idade ?? '')
       />
       {props.children}
 
-      <div className="flex justify-end mt-7cont">
-        <Botao cor="blue" className="mr-2">
+      <div className="flex justify-end mt-7">
+        <Botao cor="blue" className="mr-2" 
+        onClick={() => props.clienteMudou?.(new Cliente(nome, idade,id))}>
             {id ? 'Alterar' : 'Salvar'}
         </Botao>
-        <Botao cor="gray">
+        <Botao onClick={props.cancelado} cor="gray">
             Cancelar
         </Botao>
       </div>
