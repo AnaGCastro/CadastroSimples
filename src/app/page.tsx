@@ -4,16 +4,17 @@ import Cliente from "@/core/Cliente";
 import Layout from "./components/Layout";
 import Tabela from "./components/Tabela";
 import Botao from "./components/Botao";
+import Formulario from "./components/Formulario";
 
 
 
 export default function Home() {
 
   const clientes = [
-    new Cliente("Ana", 34, "1"),
-    new Cliente("Bia", 23, "2"),
-    new Cliente("Carlos", 45, "3"),
-    new Cliente("Daniel", 29, "4"),
+    new Cliente("Ana", 24, "1"),
+    new Cliente("Juliana", 40, "2"),
+    new Cliente("Tami", 33, "3"),
+    new Cliente("Andrea", 52, "4"),
   ]
 
   function clienteSelecionado(cliente: Cliente) {
@@ -39,7 +40,8 @@ export default function Home() {
        
       <Tabela clientes={clientes} clienteSelecionado={clienteSelecionado} 
       clienteExcluido={clienteExcluido}
-      />
+      /> 
+      <Formulario cliente={clientes[0]}></Formulario>
       </Layout>
     </div>
   )
