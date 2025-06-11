@@ -5,72 +5,76 @@ import Layout from "./components/Layout";
 import Tabela from "./components/Tabela";
 import Botao from "./components/Botao";
 import Formulario from "./components/Formulario";
-import { useState } from "react";
-
-
+import { useEffect, useRef, useState } from "react";
+import ClienteRepositorio from "@/core/ClienteRepositorio";
+// Remova o import de ColecaoCliente daqui!
 
 export default function Home() {
-
-  const [cliente, setCliente] = useState<Cliente>(Cliente.vazio())
-
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [cliente, setCliente] = useState<Cliente>(Cliente.vazio());
   const [visivel, setVisivel] = useState<'tabela' | 'formulario'>('tabela');
+  const repo = useRef<ClienteRepositorio>();
 
-  const clientes = [
-    new Cliente("Ana", 24, "1"),
-    new Cliente("Juliana", 40, "2"),
-    new Cliente("Tami", 33, "3"),
-    new Cliente("Andrea", 52, "4"),
-  ]
+  useEffect(() => {
+    // Importação dinâmica só no cliente
+    import("@/backend/db/ColecaoCliente").then(({ default: ColecaoCliente }) => {
+      repo.current = new ColecaoCliente();
+      obterTodos();
+    });
+    // eslint-disable-next-line
+  }, []);
+
+  function obterTodos() {
+    repo.current?.obterTodos().then(clientes => {
+      setClientes(clientes);
+      setVisivel('tabela');
+    });
+  }
 
   function clienteSelecionado(cliente: Cliente) {
-    setCliente(cliente)
-    setVisivel('formulario')
-
+    setCliente(cliente);
+    setVisivel('formulario');
   }
 
-
-  function clienteExcluido(cliente: Cliente) {
-    console.log(`Excluir... ${cliente.nome}`);
-
+  async function clienteExcluido(cliente: Cliente) {
+    await repo.current?.excluir(cliente);
+    obterTodos();
   }
 
-  function novoCliente(cliente: Cliente) {
-    setCliente(Cliente.vazio())
-    setVisivel('formulario')
+  function novoCliente() {
+    setCliente(Cliente.vazio());
+    setVisivel('formulario');
   }
 
-  function salvarCliente(cliente: Cliente) {
-    console.log(cliente)
-    setVisivel('tabela')
+  async function salvarCliente(cliente: Cliente) {
+    await repo.current?.salvar(cliente);
+    obterTodos();
   }
-
-
-  
 
   return (
-  <div className="flex justify-center items-center h-screen
-   bg-gradient-to-r from-blue-500 to-purple-500">
-
+    <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-500 to-purple-500">
       <Layout titulo="Cadastro Simples">
         {visivel === 'tabela' ? (
           <>
-              <div className="flex justify-end">
-         <Botao cor="green" className="mb-4" 
-         onClick={novoCliente}>Novo Cliente</Botao>
-        </div>
-       
-      <Tabela clientes={clientes} clienteSelecionado={clienteSelecionado} 
-      clienteExcluido={clienteExcluido}
-      /> 
-      </>
+            <div className="flex justify-end">
+              <Botao cor="green" className="mb-4" onClick={novoCliente}>
+                Novo Cliente
+              </Botao>
+            </div>
+            <Tabela
+              clientes={clientes}
+              clienteSelecionado={clienteSelecionado}
+              clienteExcluido={clienteExcluido}
+            />
+          </>
         ) : (
-
-           <Formulario cliente={cliente} 
-           clienteMudou={salvarCliente}
+          <Formulario
+            cliente={cliente}
+            clienteMudou={salvarCliente}
             cancelado={() => setVisivel('tabela')}
-           />
+          />
         )}
       </Layout>
     </div>
-  )
+  );
 }
